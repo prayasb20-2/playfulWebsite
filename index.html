@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Valentine?</title>
+
   <style>
     body {
       height: 100vh;
@@ -17,7 +18,7 @@
 
     .container {
       text-align: center;
-      z-index: 2;
+      z-index: 3;
     }
 
     h1 {
@@ -38,7 +39,7 @@
 
     .btn:hover {
       transform: scale(1.07);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
     }
 
     #yes {
@@ -54,16 +55,33 @@
       top: 60%;
     }
 
-    #taunt {
+    /* floating hearts */
+    .hearts {
       position: fixed;
-      font-size: 18px;
-      color: #9f1239;
-      font-weight: 600;
+      inset: 0;
       pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
+      z-index: 1;
     }
 
+    .heart {
+      position: absolute;
+      font-size: 24px;
+      animation: floatUp linear forwards;
+      opacity: 0.8;
+    }
+
+    @keyframes floatUp {
+      from {
+        transform: translateY(100vh) scale(1);
+        opacity: 0.8;
+      }
+      to {
+        transform: translateY(-10vh) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    /* celebration */
     .celebration {
       position: fixed;
       inset: 0;
@@ -71,19 +89,19 @@
       z-index: 10;
     }
 
-    .heart {
+    .burst {
       position: absolute;
-      font-size: 26px;
-      animation: pop 1.5s ease-out forwards;
+      font-size: 28px;
+      animation: burst 1.6s ease-out forwards;
     }
 
-    @keyframes pop {
+    @keyframes burst {
       0% { transform: scale(0); opacity: 1; }
       100% { transform: scale(2) translateY(-120px); opacity: 0; }
     }
 
     .message {
-      font-size: 2.5rem;
+      font-size: 2.6rem;
       color: #b4004e;
       margin-top: 30px;
       animation: fadeIn 1s ease forwards;
@@ -95,7 +113,11 @@
     }
   </style>
 </head>
+
 <body>
+
+  <div class="hearts"></div>
+  <div class="celebration" id="celebration"></div>
 
   <div class="container" id="main">
     <h1>Will you be my Valentine? 💕</h1>
@@ -103,30 +125,18 @@
   </div>
 
   <button id="no" class="btn">No 💔</button>
-  <div id="taunt"></div>
-  <div class="celebration" id="celebration"></div>
 
   <script>
+    /* ===== OLD SMOOTH NO BUTTON PHYSICS ===== */
     const noBtn = document.getElementById("no");
-    const taunt = document.getElementById("taunt");
-    const celebration = document.getElementById("celebration");
-    const main = document.getElementById("main");
 
     let x = window.innerWidth * 0.6;
     let y = window.innerHeight * 0.6;
     let vx = 0, vy = 0;
 
     const repelDistance = 140;
-    const accel = 1.3;
-    const friction = 0.92;
-
-    const taunts = [
-      "Nice try 😜",
-      "Almost!",
-      "That was close 👀",
-      "Nope 😏",
-      "Too slow!"
-    ];
+    const acceleration = 1.4;
+    const friction = 0.94;
 
     document.addEventListener("mousemove", (e) => {
       const dx = x - e.clientX;
@@ -134,11 +144,8 @@
       const dist = Math.hypot(dx, dy);
 
       if (dist < repelDistance) {
-        vx += (dx / dist) * accel;
-        vy += (dy / dist) * accel;
-
-        taunt.textContent = taunts[Math.floor(Math.random() * taunts.length)];
-        taunt.style.opacity = 1;
+        vx += (dx / dist) * acceleration;
+        vy += (dy / dist) * acceleration;
       }
     });
 
@@ -146,8 +153,15 @@
       x += vx;
       y += vy;
 
-      if (x < 0 || x > window.innerWidth - noBtn.offsetWidth) vx *= -1;
-      if (y < 0 || y > window.innerHeight - noBtn.offsetHeight) vy *= -1;
+      // bounce, no corner sticking
+      if (x < 0 || x > window.innerWidth - noBtn.offsetWidth) {
+        vx *= -1;
+        x = Math.max(0, Math.min(x, window.innerWidth - noBtn.offsetWidth));
+      }
+      if (y < 0 || y > window.innerHeight - noBtn.offsetHeight) {
+        vy *= -1;
+        y = Math.max(0, Math.min(y, window.innerHeight - noBtn.offsetHeight));
+      }
 
       vx *= friction;
       vy *= friction;
@@ -155,32 +169,47 @@
       noBtn.style.left = x + "px";
       noBtn.style.top = y + "px";
 
-      taunt.style.left = (x + 20) + "px";
-      taunt.style.top = (y - 30) + "px";
-
       requestAnimationFrame(animate);
     }
     animate();
 
+    /* ===== FLOATING HEARTS (OLD) ===== */
+    const heartsContainer = document.querySelector(".hearts");
+    const emojis = ["💖", "💕", "💘", "💗", "💓"];
+
+    setInterval(() => {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.fontSize = 18 + Math.random() * 18 + "px";
+      heart.style.animationDuration = 4 + Math.random() * 4 + "s";
+      heartsContainer.appendChild(heart);
+      setTimeout(() => heart.remove(), 8000);
+    }, 400);
+
+    /* ===== NEW YES CLICK CELEBRATION ===== */
+    const celebration = document.getElementById("celebration");
+    const main = document.getElementById("main");
+
     document.getElementById("yes").onclick = () => {
       noBtn.remove();
-      taunt.remove();
-      main.innerHTML = "<div class='message'>Yayyy 💘 I knew it!<br>Happy Valentine’s Day 🥰</div>";
-      confettiAndHearts();
+      main.innerHTML =
+        "<div class='message'>Yayyy 💘 I knew it!<br>Happy Valentine’s Day 🥰</div>";
+      launchCelebration();
     };
 
-    function confettiAndHearts() {
-      const emojis = ["💖", "💘", "💕", "💗", "💓"];
+    function launchCelebration() {
       for (let i = 0; i < 120; i++) {
-        const heart = document.createElement("div");
-        heart.className = "heart";
-        heart.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-        heart.style.left = "50%";
-        heart.style.top = "50%";
-        heart.style.fontSize = 20 + Math.random() * 20 + "px";
-        heart.style.transform = `translate(-50%, -50%) translate(${Math.random()*400-200}px, ${Math.random()*400-200}px)`;
-        celebration.appendChild(heart);
-        setTimeout(() => heart.remove(), 1500);
+        const burst = document.createElement("div");
+        burst.className = "burst";
+        burst.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        burst.style.left = "50%";
+        burst.style.top = "50%";
+        burst.style.transform =
+          `translate(-50%, -50%) translate(${Math.random()*400-200}px, ${Math.random()*400-200}px)`;
+        celebration.appendChild(burst);
+        setTimeout(() => burst.remove(), 1600);
       }
     }
   </script>
