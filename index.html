@@ -10,37 +10,49 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: linear-gradient(135deg, #1f2933, #111827);
+      overflow: hidden;
+      color: #fff;
     }
 
     .container {
       text-align: center;
-      position: relative;
     }
 
     h1 {
+      font-size: 2.5rem;
       margin-bottom: 40px;
+      letter-spacing: 0.5px;
     }
 
-    button {
-      padding: 14px 28px;
+    .btn {
+      padding: 14px 34px;
       font-size: 18px;
-      border-radius: 8px;
+      border-radius: 999px;
       border: none;
       cursor: pointer;
-      margin: 10px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
 
     #well {
-      background-color: #4CAF50;
-      color: white;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #022c22;
+      margin-right: 20px;
     }
 
     #notWell {
-      background-color: #e74c3c;
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
       color: white;
-      position: absolute;
+      position: fixed;
+      left: 60%;
+      top: 55%;
+      pointer-events: auto;
     }
   </style>
 </head>
@@ -48,23 +60,45 @@
 
   <div class="container">
     <h1>How did the meeting go?</h1>
-    <button id="well" onclick="alert('Glad to hear it went well! 😊')">
+    <button id="well" class="btn"
+      onclick="alert('Of course it went well 😌')">
       Well
-    </button>
-    <button id="notWell">
-      Not Great
     </button>
   </div>
 
+  <button id="notWell" class="btn">Not Great</button>
+
   <script>
-    const notWellBtn = document.getElementById("notWell");
+    const btn = document.getElementById("notWell");
 
-    notWellBtn.addEventListener("mouseover", () => {
-      const x = Math.random() * (window.innerWidth - 150);
-      const y = Math.random() * (window.innerHeight - 80);
+    let btnX = window.innerWidth * 0.6;
+    let btnY = window.innerHeight * 0.55;
 
-      notWellBtn.style.left = x + "px";
-      notWellBtn.style.top = y + "px";
+    const speed = 0.15; // smoothness factor
+    const safeDistance = 120;
+
+    document.addEventListener("mousemove", (e) => {
+      const dx = btnX - e.clientX;
+      const dy = btnY - e.clientY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance < safeDistance) {
+        btnX += dx * speed;
+        btnY += dy * speed;
+
+        // keep inside screen
+        btnX = Math.min(
+          window.innerWidth - btn.offsetWidth,
+          Math.max(0, btnX)
+        );
+        btnY = Math.min(
+          window.innerHeight - btn.offsetHeight,
+          Math.max(0, btnY)
+        );
+
+        btn.style.left = btnX + "px";
+        btn.style.top = btnY + "px";
+      }
     });
   </script>
 
