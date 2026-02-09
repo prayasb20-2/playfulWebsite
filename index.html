@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Meeting Feedback</title>
+  <style>
+    body {
+      height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+    }
+
+    .container {
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      margin-bottom: 40px;
+    }
+
+    button {
+      padding: 14px 28px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    #well {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    #notWell {
+      background-color: #e74c3c;
+      color: white;
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>How did the meeting go?</h1>
+    <button id="well" onclick="alert('Glad to hear it went well! 😊')">
+      Well
+    </button>
+    <button id="notWell">
+      Not Great
+    </button>
+  </div>
+
+  <script>
+    const notWellBtn = document.getElementById("notWell");
+
+    notWellBtn.addEventListener("mouseover", () => {
+      const x = Math.random() * (window.innerWidth - 150);
+      const y = Math.random() * (window.innerHeight - 80);
+
+      notWellBtn.style.left = x + "px";
+      notWellBtn.style.top = y + "px";
+    });
+  </script>
+
+</body>
+</html>
